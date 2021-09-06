@@ -1,20 +1,23 @@
-
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Pagina PHP</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS v5.0.2 -->
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+            <!-- Bootstrap CSS v5.0.2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"  integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-  </head>
-  <body>
-      <h1>Formulario Empleado</h1>
+        <title>Laravel</title>
+
+        <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    </head>
+    <body class="antialiased">
+
+        <h1>Formulario Empleado</h1>
       <div class="container">
-      <form class ="d-flex" action="crud_empleado.php" method=Post>
+      <form class ="d-flex" method="Post" id="frmEmpleado">
+      @csrf
         <div class="col">
         <div class="mb-3">
             <label for="lbl_id" class="form-label"><b>ID</b></label>
@@ -44,17 +47,9 @@
             <label for="lbl_puestos" class="form-label"><b>Puestos</b></label>
             <select class="form-select" name="drop_puesto" id="drop_puesto">
               <option value=0>--- Puesto ---</option>
-              <?php
-              include("datos_conexion.php");
-              $db_conexion = mysqli_connect($db_host,$db_usr,$db_pass,$db_nombre);
-              $db_conexion ->real_query("select id_puesto as id,puesto from puestos;");
-              $resultado = $db_conexion->use_result();
-              while($fila = $resultado->fetch_assoc()){
-                echo"<option value=". $fila ['id'] .">". $fila ['puesto'] ."</option>";
-
-              }
-              $db_conexion ->close();
-                            ?>
+                @foreach($puestos as $puesto )
+                    <option value= "{{$puesto->id_puesto}}">{{$puesto->puesto}}</option>
+                 @endforeach 
             </select>
           </div> 
           <div class="mb-3">
@@ -62,18 +57,18 @@
             <input type="date" name="txt_fn" id="txt_fn" class="form-control" placeholder="aaaa-mm-dd" Required>
           </div>
           <div class="mb-3">
-              <input type="submit" name="btn_agregar" id="btn_agregar" class="btn btn-primary" value ="agregar">
+              <input type="submit" name="btn_agregar" onclick="cambiarAction('./create')" id="btn_agregar" class="btn btn-primary" value ="agregar">
           </div>
           <div class="mb-3">
-              <input type="submit" name="btn_modificar" id="btn_modificar" class="btn btn-success" value ="modificar">
+              <input type="submit" name="btn_modificar" onclick="cambiarAction('./update')" id="btn_modificar" class="btn btn-success" value ="modificar">
           </div>
           <div class="mb-3">
-              <input type="submit" name="btn_eliminar" id="btn_eliminar" class="btn btn-danger" onclick="javascript:if(!confirm('¿Desea Eliminar?'))return false" value ="eliminar">
+              <input type="submit" name="btn_eliminar" onclick="cambiarAction('./delete')" id="btn_eliminar" class="btn btn-danger" onclick="javascript:if(!confirm('¿Desea Eliminar?'))return false" value ="eliminar">
           </div>
           <input type="submit" name="btn_nuevo" id="btn_nuevo" class="btn btn-warning" onclick="limpiar()" value="Nuevo">
           </div>
 </form>
-<table class="table table-striped table-inverse table-responsive">
+<table class="table table-striped table-inverse table-responsive" id="tbl_empleados">
   <thead class ="thead-inverse">
     <tr>
       <th>Codigo</th>
@@ -86,24 +81,17 @@
     </tr>
     </thead>
     <tbody  id="tbl_empleados">
-    <?php
-              include("datos_conexion.php");
-              $db_conexion = mysqli_connect($db_host,$db_usr,$db_pass,$db_nombre);
-              $db_conexion ->real_query("SELECT e.id_empleado as id,e.codigo, e.nombres, e.apellidos, e.direccion,e.telefono, p.puesto, e.fecha_nacimiento, e.id_puesto from empleados as e inner join puestos as p on e.id_puesto = p.id_puesto;");
-              $resultado = $db_conexion->use_result();
-              while($fila = $resultado->fetch_assoc()){
-                echo"<tr data-id=". $fila ['id'] ." data-idp=". $fila ['id_puesto'].">";
-                echo"<td>". $fila ['codigo'] ."</td>";
-                echo"<td>". $fila ['nombres'] ."</td>";
-                echo"<td>". $fila ['apellidos'] ."</td>";
-                echo"<td>". $fila ['direccion'] ."</td>";
-                echo"<td>". $fila ['telefono'] ."</td>";
-                echo"<td>". $fila ['puesto'] ."</td>";
-                echo"<td>". $fila ['fecha_nacimiento'] ."</td>";
-                echo"<tr>";
-              }
-              $db_conexion ->close();
-    ?>
+            @foreach($empleados as $empleado )
+            <tr data-id="{{$empleado->id_empleado}}" data-idp="{{$empleado->id_puesto}}">
+            <td>{{$empleado->codigo}}</td> 
+            <td>{{$empleado->nombres}}</td> 
+            <td>{{$empleado->apellidos}}</td> 
+            <td>{{$empleado->direccion}}</td> 
+            <td>{{$empleado->telefono}}</td>    
+            <td>{{$empleado->puesto->puesto}}</td>  
+            <td>{{$empleado->fecha_nacimiento}}</td>  
+        </tr>
+            @endforeach 
       
             </tbody>
             </table>
@@ -116,9 +104,16 @@
 
  
  <script>
-function limpiar(){
+
+    function cambiarAction(action){
+        let formulario = document.getElementById("frmEmpleado");
+
+        formulario.action=action;
+    }
+
+    function limpiar(){
         $("#txt_id").val(0);
-        $("#drop_puesto").val(1);
+        $("#drop_puesto").val(0);
         $("#txt_codigo").val('');
         $("#txt_nombres").val('');
         $("#txt_apellidos").val('');
@@ -135,7 +130,7 @@ function limpiar(){
         codigo = target.parent("tr").find("td").eq(0).html();
         nombres = target.parent("tr").find("td").eq(1).html();
         apellidos = target.parent("tr").find("td").eq(2).html();
- direccion = target.parent("tr").find("td").eq(3).html();
+        direccion = target.parent("tr").find("td").eq(3).html();
         telefono = target.parent("tr").find("td").eq(4).html();
         nacimiento = target.parent("tr").find("td").eq(6).html();
 
@@ -147,6 +142,8 @@ function limpiar(){
         $("#txt_direccion").val(direccion);
         $("#txt_telefono").val(telefono);
         $("#txt_fn").val(nacimiento);
+    });
    </script>
-  </body>
+
+    </body>
 </html>
