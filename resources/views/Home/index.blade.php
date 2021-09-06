@@ -14,6 +14,7 @@
     </head>
     <body class="antialiased">
 
+    
         <h1>Formulario Empleado</h1>
       <div class="container">
       <form class ="d-flex" method="Post" id="frmEmpleado">
@@ -57,13 +58,13 @@
             <input type="date" name="txt_fn" id="txt_fn" class="form-control" placeholder="aaaa-mm-dd" Required>
           </div>
           <div class="mb-3">
-              <input type="submit" name="btn_agregar" onclick="cambiarAction('./create')" id="btn_agregar" class="btn btn-primary" value ="agregar">
+              <input type="submit" name="btn_agregar" onclick="cambiarAction({{'\''.@action('Home@create').'\''}})" id="btn_agregar" class="btn btn-primary" value ="agregar">
           </div>
           <div class="mb-3">
-              <input type="submit" name="btn_modificar" onclick="cambiarAction('./update')" id="btn_modificar" class="btn btn-success" value ="modificar">
+              <input type="submit" name="btn_modificar" onclick="cambiarAction({{'\''.@action('Home@update').'\''}})" id="btn_modificar" class="btn btn-success" value ="modificar">
           </div>
           <div class="mb-3">
-              <input type="submit" name="btn_eliminar" onclick="cambiarAction('./delete')" id="btn_eliminar" class="btn btn-danger" onclick="javascript:if(!confirm('¿Desea Eliminar?'))return false" value ="eliminar">
+              <input type="submit" name="btn_eliminar" onclick="cambiarAction({{'\''.@action('Home@delete').'\''}})" id="btn_eliminar" class="btn btn-danger" onclick="javascript:if(!confirm('¿Desea Eliminar?'))return false" value ="eliminar">
           </div>
           <input type="submit" name="btn_nuevo" id="btn_nuevo" class="btn btn-warning" onclick="limpiar()" value="Nuevo">
           </div>
